@@ -31,6 +31,11 @@ async def hello(websocket, path):
         print(message)
         #await websocket.send(message)
 
-start_server = websockets.serve(hello, 'localhost', 8765, ping_timeout = None)
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+
+async def main():
+    start_server = websockets.serve(hello, port=(os.environ["PORT"]), ping_timeout=None)
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_forever()
+
+if __name__ == "__main__":
+    asyncio.run(main())
