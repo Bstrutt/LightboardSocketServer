@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-
+import signal
+import os
 import asyncio
 import websockets
+
 user = set()
 wall = set()
 
@@ -33,9 +35,16 @@ async def hello(websocket, path):
 
 
 async def main():
-    start_server = websockets.serve(hello, port=(os.environ["PORT"]), ping_timeout=None)
-    asyncio.get_event_loop().run_until_complete(start_server)
-    asyncio.get_event_loop().run_forever()
+    # Set the stop condition when receiving SIGTERM.
+    loop = asyncio.get_running_loop()
+    stop = loop.create_future()
+    loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
 
+    async with websockets.serve(
+            hello,
+            host="",
+            port=int(os.environ["PORT"]),
+    ):
+        await stop
 if __name__ == "__main__":
     asyncio.run(main())
